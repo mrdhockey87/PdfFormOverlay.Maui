@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "cGC/w6S9zTg=",
+  "success": false,
+  "projectFilePath": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "NU1105",
+      "level": "Error",
+      "message": "Unable to read project information for 'PdfFormOverlay.Maui': The property PackageVersion was expected to have a single value across all target frameworks, but instead had the following values: 1.0.0, 1.0001.0001",
+      "projectPath": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj",
+      "filePath": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj",
+      "targetGraphs": []
+    }
+  ]
+}

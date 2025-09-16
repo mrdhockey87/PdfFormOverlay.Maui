@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PdfFormOverlay.Maui.LoginPage"
+             BackgroundColor="#f0f0f0"
+             Title="Login">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Background Image or Gradient -->
+        <BoxView BackgroundColor="#2196F3" />
+
+        <!-- Login Content -->
+        <StackLayout VerticalOptions="Center"
+                     HorizontalOptions="Center"
+                     Padding="40,20">
+
+            <!-- App Logo/Icon -->
+            <Image Source="app_logo.png"
+                   WidthRequest="120"
+                   HeightRequest="120"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,30" />
+
+            <!-- Login Card -->
+            <Frame BackgroundColor="White"
+                   CornerRadius="15"
+                   HasShadow="True"
+                   Padding="30,40"
+                   WidthRequest="350">
+                <StackLayout Spacing="20">
+
+                    <!-- Title -->
+                    <Label Text="Soldiers Form Framework"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="#333"
+                           HorizontalOptions="Center" />
+
+                    <Label Text="Enter your password to access secure forms"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+
+                    <!-- Password Entry -->
+                    <StackLayout Spacing="5">
+                        <Label Text="Password"
+                               FontSize="14"
+                               TextColor="#333" />
+                        <Frame BackgroundColor="#f8f8f8"
+                               CornerRadius="8"
+                               Padding="0"
+                               HasShadow="False">
+                            <Entry x:Name="passwordEntry"
+                                   Placeholder="Enter your password"
+                                   IsPassword="True"
+                                   BackgroundColor="Transparent"
+                                   TextColor="#333" />
+                        </Frame>
+                    </StackLayout>
+
+                    <!-- Remember Me -->
+                    <StackLayout Orientation="Horizontal" Spacing="10">
+                        <CheckBox x:Name="rememberMeCheckBox" />
+                        <Label Text="Remember me"
+                               FontSize="14"
+                               TextColor="Gray"
+                               VerticalOptions="Center" />
+                    </StackLayout>
+
+                    <!-- Login Button -->
+                    <Button x:Name="loginButton"
+                            Text="Login"
+                            Clicked="OnLoginClicked"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="50"
+                            FontSize="16" />
+
+                    <!-- Forgot Password Link -->
+                    <Button Text="Forgot Password?"
+                            Clicked="OnForgotPasswordClicked"
+                            BackgroundColor="Transparent"
+                            TextColor="#2196F3"
+                            FontSize="14" />
+
+                    <!-- First Time Setup -->
+                    <Label Text="First time using the app?"
+                           FontSize="12"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           Margin="0,20,0,0" />
+
+                    <Button Text="Setup Security"
+                            x:Name="setupButton"
+                            Clicked="OnSetupSecurityClicked"
+                            BackgroundColor="#4CAF50"
+                            TextColor="White"
+                            CornerRadius="8"
+                            FontSize="14" />
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </Grid>
+</ContentPage>

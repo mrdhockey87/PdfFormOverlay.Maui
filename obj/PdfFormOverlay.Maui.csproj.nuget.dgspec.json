@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "restore": {
+    "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj": {}
+  },
+  "projects": {
+    "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj": {
+      "restore": {
+        "projectUniqueName": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj",
+        "projectPath": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj",
+        "packagesPath": "C:\\Users\\mdail.COMPADMIN\\.nuget\\packages\\",
+        "outputPath": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\obj\\",
+        "projectStyle": "PackageReference",
+        "UsingMicrosoftNETSdk": false,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mdail.COMPADMIN\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        }
+      }
+    }
+  }
+}

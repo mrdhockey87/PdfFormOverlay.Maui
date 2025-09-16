@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "targets": {},
+  "libraries": {},
+  "projectFileDependencyGroups": {},
+  "packageFolders": {
+    "C:\\Users\\mdail.COMPADMIN\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "restore": {
+      "projectUniqueName": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj",
+      "projectPath": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\PdfFormOverlay.Maui.csproj",
+      "packagesPath": "C:\\Users\\mdail.COMPADMIN\\.nuget\\packages\\",
+      "outputPath": "E:\\_MAUIProjects\\PdfFormOverlay\\PdfFormOverlay.Maui\\obj\\",
+      "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\mdail.COMPADMIN\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      }
+    }
+  },
+  "logs": [
+    {
+      "code": "NU1105",
+      "level": "Error",
+      "message": "Unable to read project information for 'PdfFormOverlay.Maui': The property PackageVersion was expected to have a single value across all target frameworks, but instead had the following values: 1.0.0, 1.0001.0001"
+    }
+  ]
+}
