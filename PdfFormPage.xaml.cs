@@ -1,3 +1,4 @@
+using Maui.PDFView.DataSources;
 using PdfFormOverlay.Maui.Models;
 using PdfFormOverlay.Maui.Services;
 
@@ -13,6 +14,8 @@ public partial class PdfFormPage : ContentPage
     private string _currentFormName;
     private List<FormField> _formFields;
     private bool _isSessionLocked = false;
+
+
 
     public PdfFormPage()
     {
@@ -36,16 +39,20 @@ public partial class PdfFormPage : ContentPage
 
         _originalPdfBytes = pdfBytes;
         _currentFormName = formName;
-        _currentFormId = GenerateFormId(pdfBytes);
+        _currentFormId = PdfFormPage.GenerateFormId(pdfBytes);
 
         // Analyze PDF for form fields
-        _formFields = await _formAnalyzer.ExtractFormFieldsAsync(pdfBytes);
+        _formFields = await PdfFormAnalyzer.ExtractFormFieldsAsync(pdfBytes);
 
-        // Load PDF in viewer
-        pdfView.LoadPdf(pdfBytes);
+        // Write them to a temporary file
+        var tempFileName = Path.Combine(FileSystem.CacheDirectory, "tempPdf.pdf");
+        File.WriteAllBytes(tempFileName, pdfBytes);
+
+        // Then set the Uri property
+        pdfView.Uri = tempFileName;
 
         // Create form overlay
-        if (_formFields.Any())
+        if (_formFields.Count != 0)
         {
             var overlay = await _overlayService.CreateFormOverlayAsync(_formFields, pdfContainer);
             pdfContainer.Children.Add(overlay);
@@ -55,25 +62,27 @@ public partial class PdfFormPage : ContentPage
         }
     }
 
-    private string GenerateFormId(byte[] pdfBytes)
+    private static string GenerateFormId(byte[] pdfBytes)
     {
-        using (var sha256 = System.Security.Cryptography.SHA256.Create())
-        {
-            var hash = sha256.ComputeHash(pdfBytes);
-            return Convert.ToHexString(hash)[..16];
-        }
+        var hash = System.Security.Cryptography.SHA256.HashData(pdfBytes);
+        return Convert.ToHexString(hash)[..16];
     }
 
     private async void OnLockClicked(object sender, EventArgs e)
     {
-        LockSession();
+        await LockSessionAsync();
     }
 
-    private void LockSession()
+    private async Task LockSessionAsync()
     {
-        _isSessionLocked = true;
-        securityOverlay.IsVisible = true;
-        unlockPasswordEntry.Text = "";
+        await Task.Run(() =>
+        {
+            _isSessionLocked = true;
+            _isSessionLocked = true;
+            securityOverlay.IsVisible = true;
+            unlockPasswordEntry.Text = "";
+        });
+
     }
 
     private async void OnUnlockClicked(object sender, EventArgs e)
@@ -113,7 +122,7 @@ public partial class PdfFormPage : ContentPage
 
     private async void OnSaveDataClicked(object sender, EventArgs e)
     {
-        if (_isSessionLocked) { LockSession(); return; }
+        if (_isSessionLocked) { await LockSessionAsync(); return; }
 
         try
         {
@@ -144,7 +153,7 @@ public partial class PdfFormPage : ContentPage
 
     private async void OnLoadDataClicked(object sender, EventArgs e)
     {
-        if (_isSessionLocked) { LockSession(); return; }
+        if (_isSessionLocked) { await LockSessionAsync(); return; }
 
         try
         {
@@ -153,7 +162,7 @@ public partial class PdfFormPage : ContentPage
 
             var savedForms = await _formDataService.GetSavedFormsAsync(_currentFormId);
 
-            if (savedForms.Any())
+            if (savedForms.Count != 0)
             {
                 var formNames = savedForms.Select(f => $"{f.FormName} - {f.SavedDate:yyyy-MM-dd HH:mm}").ToArray();
                 var selectedForm = await DisplayActionSheet("Load Saved Data", "Cancel", null, formNames);
@@ -183,13 +192,13 @@ public partial class PdfFormPage : ContentPage
 
     private async void OnDeleteDataClicked(object sender, EventArgs e)
     {
-        if (_isSessionLocked) { LockSession(); return; }
+        if (_isSessionLocked) { await LockSessionAsync(); return; }
 
         try
         {
             var savedForms = await _formDataService.GetSavedFormsAsync(_currentFormId);
 
-            if (savedForms.Any())
+            if (savedForms.Count != 0)
             {
                 var formNames = savedForms.Select(f => $"{f.FormName} - {f.SavedDate:yyyy-MM-dd HH:mm}").ToArray();
                 var selectedForm = await DisplayActionSheet("Delete Saved Data", "Cancel", null, formNames);
@@ -230,7 +239,7 @@ public partial class PdfFormPage : ContentPage
 
     private async void OnSavePdfClicked(object sender, EventArgs e)
     {
-        if (_isSessionLocked) { LockSession(); return; }
+        if (_isSessionLocked) { await LockSessionAsync(); return; }
 
         try
         {
@@ -273,7 +282,7 @@ public partial class PdfFormPage : ContentPage
 
     private async void OnPrintPdfClicked(object sender, EventArgs e)
     {
-        if (_isSessionLocked) { LockSession(); return; }
+        if (_isSessionLocked) { await LockSessionAsync(); return; }
 
         try
         {
@@ -301,7 +310,7 @@ public partial class PdfFormPage : ContentPage
 
     private async void OnEmailPdfClicked(object sender, EventArgs e)
     {
-        if (_isSessionLocked) { LockSession(); return; }
+        if (_isSessionLocked) { await LockSessionAsync(); return; }
 
         try
         {

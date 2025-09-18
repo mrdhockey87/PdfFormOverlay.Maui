@@ -1,3 +1,5 @@
+using PdfFormOverlay.Maui.Services;
+
 namespace PdfFormOverlay.Maui;
 
 public partial class LoginPage : ContentPage
@@ -50,9 +52,7 @@ public partial class LoginPage : ContentPage
             {
                 // Save password for session
                 SecurityService.SaveUserPassword(passwordEntry.Text);
-
-                // Navigate to main application
-                Application.Current.MainPage = new AppShell();
+                await LoginPage.ClosePage(this);
             }
             else
             {
@@ -71,6 +71,17 @@ public partial class LoginPage : ContentPage
         }
     }
 
+    public static Task ClosePage(Page page)
+    {
+        if (page.Navigation.ModalStack.Contains(page))
+            return page.Navigation.PopModalAsync();
+        else if (page.Navigation.NavigationStack.Contains(page))
+            return page.Navigation.PopAsync();
+        else if (Shell.Current != null)
+            return Shell.Current.GoToAsync("..");
+        else
+            throw new InvalidOperationException("Cannot determine how to close the page");
+    }
     private async void OnForgotPasswordClicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new PasswordRecoveryPage());

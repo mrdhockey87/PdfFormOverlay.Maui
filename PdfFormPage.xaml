@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:pdf="clr-namespace:Vitvov.Maui.PDFView;assembly=Vitvov.Maui.PDFView"
+             xmlns:pdf="clr-namespace:Maui.PDFView;assembly=Maui.PDFView"
              x:Class="PdfFormOverlay.Maui.PdfFormPage"
              Title="PDF Form Editor">
 
@@ -38,7 +38,7 @@
         <ScrollView Grid.Row="1" x:Name="pdfScrollView">
             <AbsoluteLayout x:Name="pdfContainer" BackgroundColor="LightGray">
                 <!-- PDF Viewer -->
-                <pdf:PDFView x:Name="pdfView"
+                <pdf:PdfView x:Name="pdfView"
                              AbsoluteLayout.LayoutBounds="0,0,1,1"
                              AbsoluteLayout.LayoutFlags="All" />
 

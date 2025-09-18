@@ -1,4 +1,7 @@
-﻿namespace PdfFormOverlay.Maui;
+﻿using Microsoft.Maui.Controls.Shapes;
+using PdfFormOverlay.Maui.Services;
+
+namespace PdfFormOverlay.Maui;
 
 public partial class PasswordRecoveryPage : ContentPage
 {
@@ -95,21 +98,22 @@ public partial class PasswordRecoveryPage : ContentPage
                 resultLabel.Text = "❌ Recovery Failed";
                 resultLabel.TextColor = Colors.DarkRed;
 
-                var incorrectFrame = new Frame
+                var incorrectBorder = new Border
                 {
                     BackgroundColor = Colors.LightYellow,
                     Padding = 10,
-                    CornerRadius = 5
+                    StrokeShape = new RoundRectangle { CornerRadius = 5 },
+                    Stroke = Colors.Orange,
+                    StrokeThickness = 1,
+                    Content = new Label
+                    {
+                        Text = "One or more answers are incorrect. Please check your answers and try again.",
+                        FontSize = 12,
+                        TextColor = Colors.DarkOrange
+                    }
                 };
 
-                incorrectFrame.Content = new Label
-                {
-                    Text = "One or more answers are incorrect. Please check your answers and try again.",
-                    FontSize = 12,
-                    TextColor = Colors.DarkOrange
-                };
-
-                ((StackLayout)resultFrame.Content).Children.Add(incorrectFrame);
+                ((StackLayout)resultFrame.Content).Children.Add(incorrectBorder);
                 resultPanel.IsVisible = true;
             }
         }
@@ -163,7 +167,7 @@ public partial class PasswordRecoveryPage : ContentPage
 
                     // Delete database file
                     var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                    var databasePath = Path.Combine(documentsPath, "databases", "soldiers.db");
+                    var databasePath = System.IO.Path.Combine(documentsPath, "databases", "soldiers.db");
 
                     if (File.Exists(databasePath))
                     {

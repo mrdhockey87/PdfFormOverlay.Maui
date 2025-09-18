@@ -13,11 +13,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("PdfFormOverlay.Maui")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b161388161419518cdc44b5911560edbfdaa3838")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("2.002.0003")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.002.0003+183a5e6ca6e60f997e8d1299c7c28cc6b94caef3")]
 [assembly: System.Reflection.AssemblyProductAttribute("PdfFormOverlay.Maui")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PdfFormOverlay.Maui")]
-[assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
+[assembly: System.Reflection.AssemblyVersionAttribute("2.002.0003")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows10.0.19041.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows10.0.17763.0")]
 

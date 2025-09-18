@@ -1,4 +1,6 @@
-﻿using iTextSharp.text.pdf;
+﻿using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.AcroForms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,43 +9,87 @@ using System.Threading.Tasks;
 
 namespace PdfFormOverlay.Maui.Services
 {
-    // PDF Processing Service (unchanged from previous version)
+    // PDF Processing Service converted to PDFsharp
     public class PdfProcessingService
     {
-        public async Task<byte[]> FillPdfFormAsync(byte[] originalPdf, Dictionary<string, object> fieldValues)
+        public static async Task<byte[]> FillPdfFormAsync(byte[] originalPdf, Dictionary<string, object> fieldValues)
         {
-            using (var output = new MemoryStream())
+            using var inputStream = new MemoryStream(originalPdf);
+            using var outputStream = new MemoryStream();
+            // Open the PDF document
+            var document = PdfReader.Open(inputStream, PdfDocumentOpenMode.Modify);
+
+            // Get the AcroForm
+            if (document.AcroForm != null)
             {
-                using (var reader = new PdfReader(originalPdf))
+                foreach (var kvp in fieldValues)
                 {
-                    using (var stamper = new PdfStamper(reader, output))
+                    var fieldName = kvp.Key;
+                    var fieldValue = kvp.Value?.ToString() ?? "";
+
+                    try
                     {
-                        var acroFields = stamper.AcroFields;
-
-                        foreach (var kvp in fieldValues)
+                        // Find the field in the AcroForm
+                        var field = document.AcroForm.Fields[fieldName];
+                        if (field != null)
                         {
-                            var fieldName = kvp.Key;
-                            var fieldValue = kvp.Value?.ToString() ?? "";
-
-                            try
+                            if (field is PdfTextField textField)
                             {
-                                acroFields.SetField(fieldName, fieldValue);
+                                textField.Text = fieldValue;
                             }
-                            catch (Exception ex)
+                            else if (field is PdfCheckBoxField checkBox)
                             {
-                                System.Diagnostics.Debug.WriteLine($"Error setting field {fieldName}: {ex.Message}");
+                                checkBox.Checked = bool.TryParse(fieldValue, out bool isChecked) && isChecked;
+                            }
+                            else if (field is PdfComboBoxField comboBox)
+                            {
+                                // For combo boxes, set the value directly
+                                comboBox.Value = new PdfString(fieldValue);
+                            }
+                            else if (field is PdfListBoxField listBox)
+                            {
+                                // For list boxes, set the value directly
+                                listBox.Value = new PdfString(fieldValue);
+                            }
+                            else if (field is PdfRadioButtonField radioButton)
+                            {
+                                // For radio buttons, set the value
+                                radioButton.Value = new PdfName(fieldValue);
+                            }
+                            else
+                            {
+                                // Generic field handling - try to set the value
+                                try
+                                {
+                                    field.Value = new PdfString(fieldValue);
+                                }
+                                catch
+                                {
+                                    // If direct value setting fails, try setting as text
+                                    field.Elements.SetString("/V", fieldValue);
+                                }
                             }
                         }
-
-                        stamper.FormFlattening = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error setting field {fieldName}: {ex.Message}");
                     }
                 }
 
-                return output.ToArray();
+                // Flatten the form (make fields non-editable)
+                // Note: PDFsharp doesn't have direct form flattening like iTextSharp
+                // You may need to implement custom flattening if required
             }
+
+            // Save to output stream
+            document.Save(outputStream);
+            document.Close();
+
+            return outputStream.ToArray();
         }
 
-        public async Task<bool> SavePdfToLocationAsync(byte[] pdfBytes, string fileName, string targetPath = null)
+        public static async Task<bool> SavePdfToLocationAsync(byte[] pdfBytes, string fileName, string targetPath = null)
         {
             try
             {
@@ -68,19 +114,24 @@ namespace PdfFormOverlay.Maui.Services
             }
         }
 
-        public async Task<bool> PrintPdfAsync(byte[] pdfBytes)
+        public static async Task<bool> PrintPdfAsync(byte[] pdfBytes)
         {
             try
             {
-                var tempPath = Path.GetTempFileName() + ".pdf";
+                // Use standard .NET file operations to avoid WinRT issues
+                var tempPath = Path.Combine(Path.GetTempPath(), $"temp_{Guid.NewGuid()}.pdf");
                 await File.WriteAllBytesAsync(tempPath, pdfBytes);
 
+                // Use platform-specific file launching
+#if WINDOWS
+                await Windows.System.Launcher.LaunchUriAsync(new Uri($"file:///{tempPath}"));
+#else
                 await Launcher.OpenAsync(new OpenFileRequest
                 {
                     File = new ReadOnlyFile(tempPath),
                     Title = "Print PDF"
                 });
-
+#endif
                 return true;
             }
             catch (Exception ex)

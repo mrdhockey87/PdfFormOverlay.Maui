@@ -1,10 +1,3 @@
-.vs/PdfFormOverlay.Maui/CopilotIndices/17.14.1204.46620/CodeChunks.db
-.vs/PdfFormOverlay.Maui/CopilotIndices/17.14.1204.46620/CodeChunks.db-shm
-.vs/PdfFormOverlay.Maui/CopilotIndices/17.14.1204.46620/CodeChunks.db-wal
-.vs/PdfFormOverlay.Maui/CopilotIndices/17.14.1204.46620/SemanticSymbols.db
-.vs/PdfFormOverlay.Maui/CopilotIndices/17.14.1204.46620/SemanticSymbols.db-shm
-.vs/PdfFormOverlay.Maui/CopilotIndices/17.14.1204.46620/SemanticSymbols.db-wal
-.vs/PdfFormOverlay.Maui/v17/.suo
-.vs/PdfFormOverlay.Maui/v17/DocumentLayout.backup.json
-.vs/PdfFormOverlay.Maui/v17/DocumentLayout.json
-.vs/PdfFormOverlay.Maui/v17/.futdcache.v2
+.vs/
+bin/
+obj/

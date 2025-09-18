@@ -51,29 +51,55 @@ public class FormOverlayService
     {
         return field.Type switch
         {
-            "Text" => new Entry
-            {
-                Placeholder = field.Name,
-                BackgroundColor = Colors.White.WithAlpha(0.8f),
-                TextChanged = (s, e) => _fieldValues[field.Name] = e.NewTextValue
-            },
-            "Checkbox" => new CheckBox
-            {
-                BackgroundColor = Colors.White.WithAlpha(0.8f),
-                CheckedChanged = (s, e) => _fieldValues[field.Name] = e.Value
-            },
-            "Dropdown" => new Picker
-            {
-                ItemsSource = field.Options?.ToList() ?? new List<string>(),
-                BackgroundColor = Colors.White.WithAlpha(0.8f),
-                SelectedIndexChanged = (s, e) =>
-                {
-                    var picker = (Picker)s;
-                    _fieldValues[field.Name] = picker.SelectedItem?.ToString() ?? "";
-                }
-            },
+            "Text" => CreateTextEntry(field),
+            "Checkbox" => CreateCheckBox(field),
+            "Dropdown" => CreatePicker(field),
             _ => null
         };
+    }
+
+    private Entry CreateTextEntry(FormField field)
+    {
+        var entry = new Entry
+        {
+            Placeholder = field.Name,
+            BackgroundColor = Colors.White.WithAlpha(0.8f)
+        };
+
+        entry.TextChanged += (s, e) => _fieldValues[field.Name] = e.NewTextValue;
+
+        return entry;
+    }
+
+    private CheckBox CreateCheckBox(FormField field)
+    {
+        var checkBox = new CheckBox
+        {
+            BackgroundColor = Colors.White.WithAlpha(0.8f)
+        };
+
+        checkBox.CheckedChanged += (s, e) => _fieldValues[field.Name] = e.Value;
+
+        return checkBox;
+    }
+
+    private Picker CreatePicker(FormField field)
+    {
+        var picker = new Picker
+        {
+            ItemsSource = field.Options?.ToList() ?? [],
+            BackgroundColor = Colors.White.WithAlpha(0.8f)
+        };
+
+        picker.SelectedIndexChanged += (s, e) =>
+        {
+            if (s is Picker pickerControl)
+            {
+                _fieldValues[field.Name] = pickerControl.SelectedItem?.ToString() ?? "";
+            }
+        };
+
+        return picker;
     }
 
     public async Task<bool> SaveFormDataAsync(string formId, string formName)
@@ -120,16 +146,16 @@ public class FormOverlayService
 
     public async Task<byte[]> GenerateFilledPdfAsync(byte[] originalPdf)
     {
-        return await _pdfProcessingService.FillPdfFormAsync(originalPdf, _fieldValues);
+        return await PdfProcessingService.FillPdfFormAsync(originalPdf, _fieldValues);
     }
 
     public async Task<bool> SavePdfAsync(byte[] filledPdf, string fileName, string path = null)
     {
-        return await _pdfProcessingService.SavePdfToLocationAsync(filledPdf, fileName, path);
+        return await PdfProcessingService.SavePdfToLocationAsync(filledPdf, fileName, path);
     }
 
     public async Task<bool> PrintPdfAsync(byte[] filledPdf)
     {
-        return await _pdfProcessingService.PrintPdfAsync(filledPdf);
+        return await PdfProcessingService.PrintPdfAsync(filledPdf);
     }
 }

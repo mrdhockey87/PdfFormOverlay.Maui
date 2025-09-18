@@ -1,5 +1,8 @@
-﻿using iTextSharp.text.pdf;
-using PdfFormOverlay.Maui.Models;
+﻿using PdfFormOverlay.Maui.Models;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.AcroForms;
+using PdfSharp.Pdf.Annotations;
+using PdfSharp.Pdf.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,73 +11,227 @@ using System.Threading.Tasks;
 
 namespace PdfFormOverlay.Maui.Services
 {
-    // PDF Form Analyzer (unchanged from previous version)
+    // PDF Form Analyzer converted to PDFsharp
     public class PdfFormAnalyzer
     {
-        public async Task<List<FormField>> ExtractFormFieldsAsync(byte[] pdfBytes)
+        public static async Task<List<FormField>> ExtractFormFieldsAsync(byte[] pdfBytes)
         {
             var formFields = new List<FormField>();
 
-            using (var reader = new PdfReader(pdfBytes))
+            using (var stream = new MemoryStream(pdfBytes))
             {
-                var acroFields = reader.AcroFields;
-                var fieldNames = acroFields.Fields.Keys;
+                var document = PdfReader.Open(stream, PdfDocumentOpenMode.ReadOnly);
 
-                foreach (string fieldName in fieldNames)
+                if (document.AcroForm != null)
                 {
-                    var field = acroFields.Fields[fieldName];
-                    var fieldPositions = acroFields.GetFieldPositions(fieldName);
-
-                    if (fieldPositions != null && fieldPositions.Count > 0)
+                    // Iterate through the field names and get the actual fields
+                    foreach (string fieldName in document.AcroForm.Fields.Names)
                     {
-                        var position = fieldPositions[0];
-
-                        var formField = new FormField
+                        try
                         {
-                            Name = fieldName,
-                            Type = DetermineFieldType(acroFields, fieldName),
-                            X = position.position.Left,
-                            Y = position.position.Bottom,
-                            Width = position.position.Width,
-                            Height = position.position.Height,
-                            PageNumber = position.page,
-                            IsRequired = IsFieldRequired(acroFields, fieldName),
-                            Options = GetFieldOptions(acroFields, fieldName)
-                        };
+                            var field = document.AcroForm.Fields[fieldName];
+                            if (field is PdfAcroField acroField)
+                            {
+                                var formField = new FormField
+                                {
+                                    Name = acroField.Name,
+                                    Type = PdfFormAnalyzer.DetermineFieldType(acroField),
+                                    X = (float)PdfFormAnalyzer.GetFieldX(acroField),
+                                    Y = (float)PdfFormAnalyzer.GetFieldY(acroField),
+                                    Width = (float)PdfFormAnalyzer.GetFieldWidth(acroField),
+                                    Height = (float)PdfFormAnalyzer.GetFieldHeight(acroField),
+                                    PageNumber = PdfFormAnalyzer.GetFieldPageNumber(acroField, document),
+                                    IsRequired = PdfFormAnalyzer.IsFieldRequired(acroField),
+                                    Options = PdfFormAnalyzer.GetFieldOptions(acroField)
+                                };
 
-                        formFields.Add(formField);
+                                formFields.Add(formField);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error processing field {fieldName}: {ex.Message}");
+                        }
                     }
                 }
+
+                document.Close();
             }
 
             return formFields;
         }
 
-        private string DetermineFieldType(AcroFields acroFields, string fieldName)
+        private static string DetermineFieldType(PdfAcroField field)
         {
-            var fieldType = acroFields.GetFieldType(fieldName);
-            return fieldType switch
+            return field switch
             {
-                AcroFields.FIELD_TYPE_TEXT => "Text",
-                AcroFields.FIELD_TYPE_CHECKBOX => "Checkbox",
-                AcroFields.FIELD_TYPE_RADIOBUTTON => "RadioButton",
-                AcroFields.FIELD_TYPE_LIST => "Dropdown",
-                AcroFields.FIELD_TYPE_COMBO => "ComboBox",
-                AcroFields.FIELD_TYPE_SIGNATURE => "Signature",
+                PdfTextField => "Text",
+                PdfCheckBoxField => "Checkbox",
+                PdfRadioButtonField => "RadioButton",
+                PdfListBoxField => "Dropdown",
+                PdfComboBoxField => "ComboBox",
+                PdfSignatureField => "Signature",
                 _ => "Unknown"
             };
         }
 
-        private bool IsFieldRequired(AcroFields acroFields, string fieldName)
+        private static double GetFieldX(PdfAcroField field)
         {
-            var fieldFlags = acroFields.GetFieldFlags(fieldName);
-            return (fieldFlags & PdfFormField.FF_REQUIRED) != 0;
+            try
+            {
+                // PDFsharp handles coordinates differently than iTextSharp
+                // This is a simplified approach - you may need to adjust based on your needs
+                var rect = field.Elements.GetRectangle("/Rect");
+                return rect?.X1 ?? 0;
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
-        private string[] GetFieldOptions(AcroFields acroFields, string fieldName)
+        private static double GetFieldY(PdfAcroField field)
         {
-            var options = acroFields.GetListSelection(fieldName);
-            return options ?? new string[0];
+            try
+            {
+                var rect = field.Elements.GetRectangle("/Rect");
+                return rect?.Y1 ?? 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private static double GetFieldWidth(PdfAcroField field)
+        {
+            try
+            {
+                var rect = field.Elements.GetRectangle("/Rect");
+                return rect != null ? Math.Abs(rect.X2 - rect.X1) : 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private static double GetFieldHeight(PdfAcroField field)
+        {
+            try
+            {
+                var rect = field.Elements.GetRectangle("/Rect");
+                return rect != null ? Math.Abs(rect.Y2 - rect.Y1) : 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private static int GetFieldPageNumber(PdfAcroField field, PdfDocument document)
+        {
+            try
+            {
+                // Simplified approach: Check if the field has a page reference
+                // In PDFsharp, fields can have a page reference in their elements
+                var pageRef = field.Elements.GetReference("/P");
+                if (pageRef != null)
+                {
+                    // Find the page index
+                    for (int i = 0; i < document.Pages.Count; i++)
+                    {
+                        if (document.Pages[i].Reference == pageRef)
+                        {
+                            return i + 1; // 1-based page numbering
+                        }
+                    }
+                }
+
+                // Alternative approach: Check all pages for annotations
+                for (int i = 0; i < document.Pages.Count; i++)
+                {
+                    var page = document.Pages[i];
+                    if (page.Annotations != null)
+                    {
+                        foreach (var annotationItem in page.Annotations)
+                        {
+                            // Cast to PdfAnnotation to access Elements
+                            if (annotationItem is PdfAnnotation annotation)
+                            {
+                                var fieldName = annotation.Elements.GetString("/T");
+                                if (fieldName == field.Name)
+                                {
+                                    return i + 1; // 1-based page numbering
+                                }
+                            }
+                            // Alternative: check if it's a PdfDictionary
+                            else if (annotationItem is PdfDictionary dict)
+                            {
+                                var fieldName = dict.Elements.GetString("/T");
+                                if (fieldName == field.Name)
+                                {
+                                    return i + 1; // 1-based page numbering
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return 1; // Default to first page
+            }
+            catch
+            {
+                return 1;
+            }
+        }
+
+        private static bool IsFieldRequired(PdfAcroField field)
+        {
+            try
+            {
+                var flags = field.Elements.GetInteger("/Ff");
+                return (flags & 2) != 0; // Required flag
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string[] GetFieldOptions(PdfAcroField field)
+        {
+            try
+            {
+                // For PDFsharp, we need to access the field options differently
+                // This is a simplified approach - actual implementation may vary
+                var optionsArray = field.Elements.GetArray("/Opt");
+                if (optionsArray != null)
+                {
+                    var options = new List<string>();
+                    foreach (var item in optionsArray)
+                    {
+                        if (item is PdfString pdfString)
+                        {
+                            options.Add(pdfString.Value);
+                        }
+                        else if (item is PdfArray pdfArray && pdfArray.Elements.Count > 0)
+                        {
+                            // Sometimes options are stored as [value, display] pairs
+                            if (pdfArray.Elements[0] is PdfString displayString)
+                            {
+                                options.Add(displayString.Value);
+                            }
+                        }
+                    }
+                    return [.. options];
+                }
+                return [];
+            }
+            catch
+            {
+                return [];
+            }
         }
     }
 }
